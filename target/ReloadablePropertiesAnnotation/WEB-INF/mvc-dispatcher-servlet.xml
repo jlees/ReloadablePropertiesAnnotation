@@ -1,0 +1,47 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <context:component-scan base-package="com.springapp.mvc"/>
+
+    <!-- Define event bus for use with GuavaPropertyChangedEventNotifier -->
+    <bean class="com.google.common.eventbus.EventBus" id="propertiesEventBus" />
+
+    <bean class="com.ag.spring_extensions.properties.conversion.DefaultPropertyConversionService" id="conversionService" />
+
+    <bean class="com.ag.spring_extensions.properties.event.GuavaPropertyChangedEventNotifier" autowire="constructor" id="eventNotifier">
+        <constructor-arg ref="propertiesEventBus" />
+    </bean>
+
+    <bean class="com.ag.spring_extensions.properties.resolver.SubstitutingPropertyResolver" id="propertyResolver" />
+
+    <bean class="com.ag.spring_extensions.properties.internal.ReloadablePropertyPostProcessor">
+        <constructor-arg ref="propertyConfigurator" />
+        <constructor-arg ref="eventNotifier" />
+        <constructor-arg ref="conversionService" />
+    </bean>
+
+    <bean id="propertyConfigurator" class="com.ag.spring_extensions.properties.internal.ReadablePropertySourcesPlaceholderConfigurer">
+        <property name="ignoreUnresolvablePlaceholders" value="false" />
+        <property name="ignoreResourceNotFound" value="true" />
+        <constructor-arg ref="eventNotifier" />
+        <constructor-arg ref="propertyResolver" />
+        <property name="locations">
+            <list>
+                <value>classpath:conf/${appEnv}_test.properties</value>
+                <value>classpath:security.properties</value>
+                <value>classpath:override.properties</value>
+            </list>
+        </property>
+    </bean>
+
+
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/WEB-INF/pages/"/>
+        <property name="suffix" value=".jsp"/>
+    </bean>
+
+</beans>
