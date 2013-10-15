@@ -5,30 +5,15 @@
         http://www.springframework.org/schema/beans/spring-beans.xsd
         http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
+    <context:annotation-config/>
     <context:component-scan base-package="com.springapp.mvc"/>
-
-    <!-- Define event bus for use with GuavaPropertyChangedEventNotifier -->
-    <bean class="com.google.common.eventbus.EventBus" id="propertiesEventBus" />
-
-    <bean class="com.ag.spring_extensions.properties.conversion.DefaultPropertyConversionService" id="conversionService" />
-
-    <bean class="com.ag.spring_extensions.properties.event.GuavaPropertyChangedEventNotifier" autowire="constructor" id="eventNotifier">
-        <constructor-arg ref="propertiesEventBus" />
-    </bean>
-
-    <bean class="com.ag.spring_extensions.properties.resolver.SubstitutingPropertyResolver" id="propertyResolver" />
-
-    <bean class="com.ag.spring_extensions.properties.internal.ReloadablePropertyPostProcessor">
-        <constructor-arg ref="propertyConfigurator" />
-        <constructor-arg ref="eventNotifier" />
-        <constructor-arg ref="conversionService" />
-    </bean>
+    <context:component-scan base-package="com.ag.spring_extensions"/>
 
     <bean id="propertyConfigurator" class="com.ag.spring_extensions.properties.internal.ReadablePropertySourcesPlaceholderConfigurer">
         <property name="ignoreUnresolvablePlaceholders" value="false" />
         <property name="ignoreResourceNotFound" value="true" />
-        <constructor-arg ref="eventNotifier" />
-        <constructor-arg ref="propertyResolver" />
+        <constructor-arg ref="reloadablePropertyEventNotifier" />
+        <constructor-arg ref="reloadablePropertyPropertyResolver" />
         <property name="locations">
             <list>
                 <value>classpath:conf/${appEnv}_test.properties</value>
